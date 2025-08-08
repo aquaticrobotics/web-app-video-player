@@ -28,7 +28,7 @@ const cspConfig = {
 const helmetConfig = {
   contentSecurityPolicy: cspConfig,
   crossOriginEmbedderPolicy: { policy: "credentialless" },
-  crossOriginOpenerPolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "same-origin" },
   crossOriginResourcePolicy: { policy: "cross-origin" },
   dnsPrefetchControl: { allow: false },
   frameguard: { action: 'deny' },

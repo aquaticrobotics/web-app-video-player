@@ -84,8 +84,10 @@ class ApiService {
       console.log('📡 DEBUG: Making API request to /api/videos');
       console.log('📡 DEBUG: Using global axios instance with interceptors');
       console.log('📡 DEBUG: Base URL:', this.api.defaults.baseURL);
+      console.log('📡 DEBUG: Request headers will include Authorization if token exists');
       
       const response = await this.api.get('/api/videos');
+      console.log('📡 DEBUG: API Response status:', response.status);
       console.log('📡 DEBUG: API Response structure:', response.data);
       console.log('📡 DEBUG: Extracting videos array:', response.data.videos);
       
@@ -97,9 +99,17 @@ class ApiService {
       
       return videos;
     } catch (error) {
-      console.error('Error fetching videos:', error);
-      console.error('📡 DEBUG: Response status:', error.response?.status);
-      console.error('📡 DEBUG: Response data:', error.response?.data);
+      console.error('📡 ERROR: Failed to fetch videos:', error.message);
+      console.error('📡 ERROR: Response status:', error.response?.status);
+      console.error('📡 ERROR: Response data:', error.response?.data);
+      
+      if (error.response?.status === 401) {
+        console.error('📡 ERROR: Unauthorized - token may be missing or invalid');
+        console.error('📡 ERROR: Check if authentication interceptor is working');
+      } else if (error.response?.status === 404) {
+        console.error('📡 ERROR: Endpoint not found - check API base URL');
+      }
+      
       throw error;
     }
   }
@@ -210,10 +220,18 @@ class ApiService {
 
   async getVideoStreamInfo(id) {
     try {
+      console.log('📡 DEBUG: Getting stream info for video ID:', id);
+      console.log('📡 DEBUG: Request URL:', `${this.api.defaults.baseURL}/api/stream/${id}/info`);
+      console.log('📡 DEBUG: Auth headers should be automatically added by interceptor');
+      
       const response = await this.api.get(`/api/stream/${id}/info`);
+      console.log('📡 DEBUG: Stream info response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching stream info:', error);
+      console.error('📡 ERROR: Failed to fetch stream info:', error);
+      console.error('📡 ERROR: Response status:', error.response?.status);
+      console.error('📡 ERROR: Response data:', error.response?.data);
+      console.error('📡 ERROR: Response headers:', error.response?.headers);
       throw error;
     }
   }

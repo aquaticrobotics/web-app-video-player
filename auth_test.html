@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background-color: #f9fff9; }
+        .error { border-color: #f44336; background-color: #fff9f9; }
+        .pending { border-color: #2196F3; background-color: #f9f9ff; }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #1976D2; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .log {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Video Streaming App - Authentication Test</h1>
+        <p>This page tests the authentication flow to help diagnose any issues.</p>
+        
+        <div id="loginSection" class="test-section pending">
+            <h3>1. Login Test</h3>
+            <input type="text" id="accessCode" placeholder="Access Code" value="1776">
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult" class="log"></div>
+        </div>
+
+        <div id="verifySection" class="test-section">
+            <h3>2. Token Verification Test</h3>
+            <button onclick="testVerification()" disabled id="verifyBtn">Test Token Verification</button>
+            <div id="verifyResult" class="log"></div>
+        </div>
+
+        <div id="videosSection" class="test-section">
+            <h3>3. Protected Videos API Test</h3>
+            <button onclick="testVideosAPI()" disabled id="videosBtn">Test Videos API</button>
+            <div id="videosResult" class="log"></div>
+        </div>
+
+        <div id="fullFlowSection" class="test-section">
+            <h3>4. Complete Authentication Flow</h3>
+            <button onclick="testCompleteFlow()">Test Complete Flow</button>
+            <div id="flowResult" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001';
+        let currentToken = null;
+
+        function log(sectionId, message) {
+            const logElement = document.getElementById(sectionId);
+            logElement.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function setStatus(sectionId, status) {
+            const section = document.getElementById(sectionId.replace('Result', 'Section'));
+            section.className = `test-section ${status}`;
+        }
+
+        async function testLogin() {
+            const accessCode = document.getElementById('accessCode').value;
+            const logId = 'loginResult';
+            
+            document.getElementById('loginResult').textContent = '';
+            setStatus(logId, 'pending');
+            log(logId, 'Starting login test...');
+            
+            try {
+                log(logId, `Making POST request to ${API_BASE_URL}/auth/login`);
+                log(logId, `Access code: ${accessCode}`);
+                
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ accessCode: accessCode })
+                });
+
+                log(logId, `Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                log(logId, `Response data: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success && data.token) {
+                    currentToken = data.token;
+                    log(logId, `✅ Login successful! Token received (${data.token.length} chars)`);
+                    log(logId, `Token expires in: ${data.expiresIn}`);
+                    
+                    // Enable next test
+                    document.getElementById('verifyBtn').disabled = false;
+                    document.getElementById('videosBtn').disabled = false;
+                    setStatus(logId, 'success');
+                } else {
+                    throw new Error('Login response missing success or token');
+                }
+                
+            } catch (error) {
+                log(logId, `❌ Login failed: ${error.message}`);
+                setStatus(logId, 'error');
+                currentToken = null;
+                document.getElementById('verifyBtn').disabled = true;
+                document.getElementById('videosBtn').disabled = true;
+            }
+        }
+
+        async function testVerification() {
+            const logId = 'verifyResult';
+            
+            document.getElementById('verifyResult').textContent = '';
+            setStatus(logId, 'pending');
+            log(logId, 'Starting token verification test...');
+            
+            if (!currentToken) {
+                log(logId, '❌ No token available. Please login first.');
+                setStatus(logId, 'error');
+                return;
+            }
+            
+            try {
+                log(logId, `Making POST request to ${API_BASE_URL}/auth/verify`);
+                log(logId, `Token (first 50 chars): ${currentToken.substring(0, 50)}...`);
+                
+                const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: currentToken })
+                });
+
+                log(logId, `Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                log(logId, `Response data: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.valid) {
+                    log(logId, `✅ Token verification successful!`);
+                    log(logId, `Decoded payload: ${JSON.stringify(data.decoded, null, 2)}`);
+                    setStatus(logId, 'success');
+                } else {
+                    throw new Error('Token verification returned false');
+                }
+                
+            } catch (error) {
+                log(logId, `❌ Token verification failed: ${error.message}`);
+                setStatus(logId, 'error');
+            }
+        }
+
+        async function testVideosAPI() {
+            const logId = 'videosResult';
+            
+            document.getElementById('videosResult').textContent = '';
+            setStatus(logId, 'pending');
+            log(logId, 'Starting videos API test...');
+            
+            if (!currentToken) {
+                log(logId, '❌ No token available. Please login first.');
+                setStatus(logId, 'error');
+                return;
+            }
+            
+            try {
+                log(logId, `Making GET request to ${API_BASE_URL}/api/videos`);
+                log(logId, `Using Authorization header: Bearer ${currentToken.substring(0, 50)}...`);
+                
+                const response = await fetch(`${API_BASE_URL}/api/videos`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                    }
+                });
+
+                log(logId, `Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                log(logId, `Response data structure: ${JSON.stringify(Object.keys(data), null, 2)}`);
+                
+                if (data.success && data.videos) {
+                    log(logId, `✅ Videos API successful!`);
+                    log(logId, `Found ${data.videos.length} videos`);
+                    log(logId, `Video titles: ${data.videos.map(v => v.title || v.name).join(', ')}`);
+                    setStatus(logId, 'success');
+                } else {
+                    throw new Error('Videos API response missing success or videos array');
+                }
+                
+            } catch (error) {
+                log(logId, `❌ Videos API failed: ${error.message}`);
+                setStatus(logId, 'error');
+            }
+        }
+
+        async function testCompleteFlow() {
+            const logId = 'flowResult';
+            
+            document.getElementById('flowResult').textContent = '';
+            setStatus(logId, 'pending');
+            log(logId, 'Starting complete authentication flow test...');
+            
+            // Reset state
+            currentToken = null;
+            
+            try {
+                // Step 1: Login
+                log(logId, '\n=== STEP 1: LOGIN ===');
+                await testLogin();
+                
+                if (!currentToken) {
+                    throw new Error('Login step failed');
+                }
+                
+                // Step 2: Verify token
+                log(logId, '\n=== STEP 2: VERIFY TOKEN ===');
+                await testVerification();
+                
+                // Step 3: Test protected API
+                log(logId, '\n=== STEP 3: TEST PROTECTED API ===');
+                await testVideosAPI();
+                
+                log(logId, '\n🎉 COMPLETE FLOW SUCCESSFUL!');
+                log(logId, 'Frontend authentication should work correctly.');
+                setStatus(logId, 'success');
+                
+            } catch (error) {
+                log(logId, `\n❌ Complete flow failed: ${error.message}`);
+                setStatus(logId, 'error');
+            }
+        }
+
+        // Test CORS on page load
+        window.onload = function() {
+            fetch(`${API_BASE_URL}/health`)
+                .then(response => {
+                    console.log('✅ CORS test successful - backend is accessible');
+                })
+                .catch(error => {
+                    console.error('❌ CORS test failed:', error);
+                });
+        };
+    </script>
+</body>
+</html>

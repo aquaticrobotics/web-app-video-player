@@ -58,7 +58,9 @@ const VideoPlayer = ({
         setLoading(true);
         setError(null);
         
+        console.log('🎬 DEBUG: Loading video info for videoId:', videoId);
         const info = await apiService.getVideoStreamInfo(videoId);
+        console.log('🎬 DEBUG: Video info response:', info);
         setVideoInfo(info.info);
         
         // Determine available qualities based on resolution
@@ -71,7 +73,9 @@ const VideoPlayer = ({
         setDuration(info.info.duration || 0);
         
       } catch (err) {
-        console.error('Error loading video info:', err);
+        console.error('🎬 ERROR: Failed to load video info:', err);
+        console.error('🎬 ERROR: Error details:', err.response?.data);
+        console.error('🎬 ERROR: Error status:', err.response?.status);
         setError('Failed to load video information');
         onError?.(err);
       } finally {

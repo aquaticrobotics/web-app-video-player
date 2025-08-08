@@ -1,0 +1,8 @@
+# Python requirements for this repository
+# Note: This project uses Node.js (file-server) and React (web-client).
+# No Python dependencies are required to run the application.
+#
+# If you still want a Python virtual environment for tooling or scripts,
+# you can optionally pin common utilities by uncommenting lines below:
+# pip>=23.0
+# nodeenv>=1.8.0

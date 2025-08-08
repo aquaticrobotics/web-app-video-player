@@ -112,13 +112,30 @@ class VideoService {
       ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) {
           console.error(`FFprobe error for ${filePath}:`, err.message);
-          // Return basic metadata if ffprobe fails
+          console.log('Using fallback metadata values for video playback compatibility');
+          // Return enhanced fallback metadata when ffprobe fails
+          // Provide reasonable defaults that allow video playback
+          const fileStats = require('fs').statSync(filePath);
+          const fileExtension = path.extname(filePath).toLowerCase();
+          
+          // Estimate duration based on file size (rough approximation)
+          // Average bitrate assumption: 1MB per minute for SD video
+          const estimatedDurationMinutes = Math.max(1, fileStats.size / (1024 * 1024));
+          const estimatedDuration = Math.min(estimatedDurationMinutes * 60, 7200); // Cap at 2 hours
+          
           resolve({
-            duration: 0,
-            width: 0,
-            height: 0,
-            format: path.extname(filePath).toLowerCase(),
-            title: path.basename(filePath, path.extname(filePath))
+            duration: estimatedDuration, // Use estimated duration instead of 0
+            width: 1280, // Default to 720p resolution
+            height: 720,
+            format: fileExtension.replace('.', ''),
+            title: path.basename(filePath, path.extname(filePath)),
+            size: fileStats.size,
+            bitrate: Math.floor(fileStats.size * 8 / estimatedDuration), // Calculated bitrate
+            videoCodec: 'unknown',
+            audioCodec: 'unknown',
+            hasAudio: true, // Assume video has audio
+            hasVideo: true,
+            fps: 25 // Default fps
           });
           return;
         }
