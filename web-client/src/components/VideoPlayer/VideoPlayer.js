@@ -26,9 +26,10 @@ const VideoPlayer = ({ videoId, title, onClose }) => {
     );
   }
 
-  // Direct streaming URL
-  const streamUrl = `http://localhost:3001/api/stream/${videoId}`;
+  // Dynamic streaming URL based on current hostname
+  const streamUrl = `http://${window.location.hostname}:3001/api/stream/${videoId}`;
   console.log('🎬 [VIDEO PLAYER DEBUG] Generated stream URL:', streamUrl);
+  console.log('🎬 [VIDEO PLAYER DEBUG] Current hostname:', window.location.hostname);
 
   return (
     <div className="video-player-overlay">

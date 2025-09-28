@@ -32,7 +32,7 @@ function getOptimalChunkSize(fileSize, requestedRange) {
   return Math.min(STREAM_CONFIG.MAX_CHUNK_SIZE, Math.max(STREAM_CONFIG.MIN_CHUNK_SIZE, rangeSize));
 }
 
-// Enhanced CORS headers for streaming
+// Enhanced CORS headers for streaming with Safari/mobile compatibility
 function setStreamingHeaders(res, mimeType, cacheControl = true) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
@@ -40,6 +40,10 @@ function setStreamingHeaders(res, mimeType, cacheControl = true) {
   res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Content-Type, Accept-Ranges');
   res.setHeader('Accept-Ranges', 'bytes');
   res.setHeader('Content-Type', mimeType);
+  
+  // Safari/iOS specific headers for better video compatibility
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Connection', 'keep-alive');
   
   if (cacheControl) {
     res.setHeader('Cache-Control', `public, max-age=${STREAM_CONFIG.CACHE_DURATION}, immutable`);
