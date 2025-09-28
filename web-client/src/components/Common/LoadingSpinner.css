@@ -1,0 +1,126 @@
+/* Loading Spinner Styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+.loading-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(20, 20, 20, 0.9);
+  z-index: var(--z-modal);
+  min-height: 100vh;
+}
+
+.spinner {
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  border-style: solid;
+}
+
+/* Spinner Sizes */
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.spinner-medium {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.spinner-large {
+  width: 60px;
+  height: 60px;
+  border-width: 4px;
+}
+
+.spinner-xlarge {
+  width: 80px;
+  height: 80px;
+  border-width: 5px;
+}
+
+/* Spinner Colors */
+.spinner-primary {
+  border-color: var(--dark-bg-lighter);
+  border-top-color: var(--primary-red);
+}
+
+.spinner-secondary {
+  border-color: var(--dark-bg-lighter);
+  border-top-color: var(--text-secondary);
+}
+
+.spinner-white {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: var(--text-primary);
+}
+
+.spinner-blue {
+  border-color: var(--dark-bg-lighter);
+  border-top-color: var(--accent-blue);
+}
+
+/* Loading Text */
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+    border-top-color: var(--primary-red);
+  }
+  
+  .loading-text {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .spinner-primary {
+    border-color: var(--text-muted);
+    border-top-color: var(--text-primary);
+  }
+  
+  .loading-text {
+    color: var(--text-primary);
+  }
+}

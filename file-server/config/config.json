@@ -1,0 +1,41 @@
+{
+  "port": 3001,
+  "videoFolder": "D:\\Test",
+  "thumbnailFolder": "./thumbnails",
+  "accessCode": "1776",
+  "requireAuth": false,
+  "jwtSecret": "your-secret-key-change-in-production",
+  "corsOrigins": ["http://localhost:3000", "http://10.0.0.100:3000"],
+  "maxThumbnailAge": 86400000,
+  "supportedFormats": [".mp4", ".avi", ".mkv", ".mov", ".webm"],
+  "thumbnailSize": "320x180",
+  "videoQuality": {
+    "low": "480p",
+    "medium": "720p",
+    "high": "1080p"
+  },
+  "rateLimit": {
+    "windowMs": 900000,
+    "max": 100
+  },
+  "security": {
+    "enableIpWhitelist": false,
+    "allowedIPs": [],
+    "enableSecurityLogging": true,
+    "blockSuspiciousRequests": true
+  },
+  "logging": {
+    "level": "info",
+    "enableFileLogging": false,
+    "logDirectory": "./logs",
+    "maxLogSize": "10MB",
+    "maxLogFiles": 5
+  },
+  "production": {
+    "enableGzip": true,
+    "enableCaching": true,
+    "cacheDuration": 3600,
+    "healthCheckInterval": 60000,
+    "enableMetrics": false
+  }
+}

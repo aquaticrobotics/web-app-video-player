@@ -1,0 +1,350 @@
+/* Video Card Styles */
+.video-card {
+  position: relative;
+  background-color: var(--dark-bg-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-card:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-xl);
+  z-index: 10;
+}
+
+.video-card:focus {
+  outline: 2px solid var(--primary-red);
+  outline-offset: 2px;
+}
+
+/* Thumbnail Container */
+.video-card-thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-color: var(--dark-bg-lighter);
+  overflow: hidden;
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--transition-normal);
+  opacity: 0;
+}
+
+.video-thumbnail.loaded {
+  opacity: 1;
+}
+
+.video-thumbnail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dark-bg-lighter);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  gap: var(--spacing-sm);
+}
+
+.video-thumbnail-error .error-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+/* Skeleton Loading */
+.video-card-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--dark-bg-lighter) 25%,
+    var(--dark-bg-light) 50%,
+    var(--dark-bg-lighter) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.skeleton-shimmer {
+  width: 100%;
+  height: 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Overlay */
+.video-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.video-card:hover .video-card-overlay {
+  opacity: 1;
+}
+
+/* Play Button */
+.play-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background-color: rgba(229, 9, 20, 0.9);
+  border-radius: 50%;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  transform: scale(0.8);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-lg);
+}
+
+.video-card:hover .play-button {
+  transform: scale(1);
+  background-color: var(--primary-red);
+}
+
+.play-button:hover {
+  transform: scale(1.1);
+}
+
+/* Video Info Badges */
+.video-card-info {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-end;
+}
+
+.video-duration,
+.video-quality {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.video-quality {
+  background-color: rgba(229, 9, 20, 0.8);
+}
+
+/* Card Details */
+.video-card-details {
+  padding: var(--spacing-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.video-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+
+.video-card:hover .video-title {
+  color: var(--primary-red);
+}
+
+.video-metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+
+.video-size,
+.video-category {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  background-color: var(--dark-bg-lighter);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.video-category {
+  background-color: rgba(0, 113, 235, 0.2);
+  color: var(--accent-blue);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .video-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .play-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .video-title {
+    font-size: 0.9rem;
+  }
+  
+  .video-metadata {
+    font-size: 0.8rem;
+    gap: var(--spacing-sm);
+  }
+  
+  .video-card-info {
+    top: 4px;
+    right: 4px;
+  }
+  
+  .video-duration,
+  .video-quality {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-card-details {
+    padding: var(--spacing-sm);
+  }
+  
+  .video-title {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 1;
+  }
+  
+  .video-metadata {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .play-button {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .video-card {
+    border: 2px solid var(--text-secondary);
+  }
+  
+  .video-card:hover {
+    border-color: var(--primary-red);
+  }
+  
+  .video-card-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .play-button {
+    background-color: var(--primary-red);
+    border: 2px solid var(--text-primary);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .video-card,
+  .video-thumbnail,
+  .video-card-overlay,
+  .play-button,
+  .video-title {
+    transition: none;
+  }
+  
+  .video-card:hover {
+    transform: none;
+  }
+  
+  .skeleton-shimmer {
+    animation: none;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.video-card:focus-visible {
+  outline: 3px solid var(--primary-red);
+  outline-offset: 3px;
+}
+
+/* Loading state */
+.video-card.loading {
+  pointer-events: none;
+}
+
+.video-card.loading .video-card-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.video-card.loading .play-button {
+  transform: scale(1);
+  animation: pulse-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-loading {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
