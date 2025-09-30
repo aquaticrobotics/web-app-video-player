@@ -49,7 +49,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static files for thumbnails
-app.use('/thumbnails', express.static(path.join(__dirname, config.thumbnailFolder)));
+// Use absolute path if provided, otherwise relative to __dirname
+const thumbnailPath = path.isAbsolute(config.thumbnailFolder)
+  ? config.thumbnailFolder
+  : path.join(__dirname, config.thumbnailFolder);
+app.use('/thumbnails', express.static(thumbnailPath));
 
 // Routes
 app.use('/auth', authRoutes);

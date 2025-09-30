@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import VideoPlayer from '../components/VideoPlayer/VideoPlayer';
-import { FaArrowLeft, FaPlay, FaDownload, FaClock, FaDesktop, FaFolder, FaTimes } from 'react-icons/fa';
+import { FaArrowLeft, FaPlay, FaDownload, FaClock, FaDesktop, FaFolder, FaTimes, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { useFavorites } from '../context/FavoritesContext';
 import './VideoDetail.css';
 
 const VideoDetail = () => {
@@ -13,6 +14,7 @@ const VideoDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPlayer, setShowPlayer] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -75,6 +77,12 @@ const VideoDetail = () => {
   const handleDownload = () => {
     const downloadUrl = apiService.getVideoDownloadUrl(video.id);
     window.open(downloadUrl, '_blank');
+  };
+
+  const handleFavoriteClick = () => {
+    if (video) {
+      toggleFavorite(video.id);
+    }
   };
 
   if (loading) {
@@ -219,6 +227,14 @@ const VideoDetail = () => {
               <button className="btn btn-secondary" onClick={handleDownload}>
                 <FaDownload />
                 Download
+              </button>
+              <button
+                className={`btn btn-ghost favorite-button ${isFavorite(video.id) ? 'favorited' : ''}`}
+                onClick={handleFavoriteClick}
+                title={isFavorite(video.id) ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                {isFavorite(video.id) ? <FaHeart /> : <FaRegHeart />}
+                {isFavorite(video.id) ? 'Favorited' : 'Add to Favorites'}
               </button>
             </div>
           </div>

@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { FaPlay, FaClock, FaDesktop } from 'react-icons/fa';
+import { FaPlay, FaClock, FaDesktop, FaHeart, FaRegHeart } from 'react-icons/fa';
 import { apiService } from '../../services/api';
+import { useFavorites } from '../../context/FavoritesContext';
 import './VideoCard.css';
 
 const VideoCard = ({ video, onClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   if (!video) return null;
+
+  const isVideoFavorite = isFavorite(video.id);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -22,6 +26,11 @@ const VideoCard = ({ video, onClick }) => {
     if (onClick) {
       onClick(video);
     }
+  };
+
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation(); // Prevent video from playing when clicking heart
+    toggleFavorite(video.id);
   };
 
   const handleKeyDown = (e) => {
@@ -87,6 +96,16 @@ const VideoCard = ({ video, onClick }) => {
             </span>
           )}
         </div>
+
+        {/* Favorites Heart Button */}
+        <button
+          className={`favorite-button ${isVideoFavorite ? 'favorited' : ''}`}
+          onClick={handleFavoriteClick}
+          aria-label={isVideoFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          title={isVideoFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          {isVideoFavorite ? <FaHeart /> : <FaRegHeart />}
+        </button>
       </div>
 
       <div className="video-card-details">

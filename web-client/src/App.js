@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { FavoritesProvider } from './context/FavoritesContext';
 import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -100,7 +101,9 @@ function App() {
     >
       <Router>
         <AuthProvider>
-          <AppContent />
+          <FavoritesProvider>
+            <AppContent />
+          </FavoritesProvider>
         </AuthProvider>
       </Router>
     </ErrorBoundary>

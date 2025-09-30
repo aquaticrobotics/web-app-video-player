@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import VideoGrid, { VideoGridSection } from '../components/VideoGrid/VideoGrid';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { apiService } from '../services/api';
-import { FaSync, FaFilm, FaChartBar } from 'react-icons/fa';
+import { useFavorites } from '../context/FavoritesContext';
+import { FaSync, FaFilm, FaChartBar, FaHeart, FaRegHeart } from 'react-icons/fa';
 import './Home.css';
 
 const Home = () => {
@@ -13,7 +14,9 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const navigate = useNavigate();
+  const { getFavoritesList, favoritesCount } = useFavorites();
 
   // Fetch all data on component mount
   const fetchData = useCallback(async () => {
@@ -109,6 +112,26 @@ const Home = () => {
     return shuffled.slice(0, 12);
   };
 
+  // Get favorite videos
+  const getFavoriteVideos = () => {
+    if (!videos.length) return [];
+    const favoriteIds = getFavoritesList();
+    return videos.filter(video => favoriteIds.includes(video.id));
+  };
+
+  // Get filtered videos based on current filter
+  const getFilteredVideos = () => {
+    if (showFavoritesOnly) {
+      return getFavoriteVideos();
+    }
+    return videos;
+  };
+
+  // Toggle favorites filter
+  const toggleFavoritesFilter = () => {
+    setShowFavoritesOnly(!showFavoritesOnly);
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -138,7 +161,17 @@ const Home = () => {
           </div>
           
           <div className="home-header-actions">
-            <button 
+            <button
+              className={`btn ${showFavoritesOnly ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={toggleFavoritesFilter}
+              disabled={loading}
+              title={showFavoritesOnly ? 'Show all videos' : 'Show favorites only'}
+            >
+              {showFavoritesOnly ? <FaHeart /> : <FaRegHeart />}
+              {showFavoritesOnly ? `Favorites (${favoritesCount})` : 'Show Favorites'}
+            </button>
+            
+            <button
               className="btn btn-secondary"
               onClick={handleRefreshLibrary}
               disabled={refreshing}
@@ -193,8 +226,8 @@ const Home = () => {
         {/* All Videos Grid */}
         {!error && (
           <VideoGrid
-            title="All Videos"
-            videos={videos}
+            title={showFavoritesOnly ? `Favorite Videos (${favoritesCount})` : "All Videos"}
+            videos={getFilteredVideos()}
             loading={loading}
             error={error}
             onVideoClick={handleVideoClick}

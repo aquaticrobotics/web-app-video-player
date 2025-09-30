@@ -13,22 +13,30 @@
     "clean": "rm -rf node_modules thumbnails/* logs/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["video", "streaming", "server", "express"],
+  "keywords": [
+    "video",
+    "streaming",
+    "server",
+    "express"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1",
-    "jsonwebtoken": "^9.0.2",
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "@vladmandic/face-api": "^1.7.15",
     "bcryptjs": "^2.4.3",
+    "canvas": "^3.2.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.10.0",
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^11.1.1",
-    "path": "^0.12.7",
-    "mime-types": "^2.1.35",
-    "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
-    "compression": "^1.7.4"
+    "jsonwebtoken": "^9.0.2",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

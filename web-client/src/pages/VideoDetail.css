@@ -244,6 +244,41 @@
   min-width: 180px;
 }
 
+/* Favorite Button Styles */
+.video-actions .favorite-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  border: 1px solid var(--dark-bg-lighter);
+  transition: all var(--transition-normal);
+}
+
+.video-actions .favorite-button:hover {
+  color: var(--primary-red);
+  border-color: var(--primary-red);
+  background-color: rgba(229, 9, 20, 0.1);
+}
+
+.video-actions .favorite-button.favorited {
+  color: var(--primary-red);
+  border-color: var(--primary-red);
+  background-color: rgba(229, 9, 20, 0.2);
+}
+
+.video-actions .favorite-button.favorited:hover {
+  background-color: rgba(229, 9, 20, 0.3);
+}
+
+.video-actions .favorite-button svg {
+  font-size: 1rem;
+  transition: transform var(--transition-fast);
+}
+
+.video-actions .favorite-button:hover svg {
+  transform: scale(1.1);
+}
+
 /* Video Description */
 .video-description {
   background-color: var(--dark-bg-light);

@@ -1,7 +1,7 @@
 {
   "port": 3001,
   "videoFolder": "D:\\Test",
-  "thumbnailFolder": "./thumbnails",
+  "thumbnailFolder": "D:\\Test\\.thumbnails",
   "accessCode": "1776",
   "requireAuth": false,
   "jwtSecret": "your-secret-key-change-in-production",

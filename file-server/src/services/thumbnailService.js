@@ -1,11 +1,50 @@
 const fs = require('fs-extra');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
+const { exec } = require('child_process');
+const { promisify } = require('util');
 const config = require('../../config/config.json');
+
+const execAsync = promisify(exec);
 
 class ThumbnailService {
   constructor() {
     this.thumbnailCache = new Map();
+    this.useFaceDetection = true; // Enable face detection by default
+    this.pythonAvailable = null; // Will be checked lazily
+  }
+
+  /**
+   * Check if Python and OpenCV are available
+   */
+  async checkPythonAvailability() {
+    if (this.pythonAvailable !== null) {
+      return this.pythonAvailable;
+    }
+
+    try {
+      // Try python3 first, then python
+      try {
+        await execAsync('python3 --version');
+        await execAsync('python3 -c "import cv2"');
+        this.pythonCommand = 'python3';
+        this.pythonAvailable = true;
+        console.log('✅ Python3 with OpenCV available for face detection');
+      } catch (e) {
+        await execAsync('python --version');
+        await execAsync('python -c "import cv2"');
+        this.pythonCommand = 'python';
+        this.pythonAvailable = true;
+        console.log('✅ Python with OpenCV available for face detection');
+      }
+      return true;
+    } catch (error) {
+      console.warn('⚠️  Python/OpenCV not available. Install with: pip install opencv-python');
+      console.warn('💡 Falling back to standard first-frame thumbnails');
+      this.pythonAvailable = false;
+      this.useFaceDetection = false;
+      return false;
+    }
   }
 
   async generateThumbnail(videoPath, videoId) {
@@ -30,6 +69,28 @@ class ThumbnailService {
       // Ensure thumbnail directory exists
       await fs.ensureDir(config.thumbnailFolder);
 
+      // Try Python-based face detection first
+      if (this.useFaceDetection && await this.checkPythonAvailability()) {
+        try {
+          console.log('🔍 Attempting face detection for thumbnail...');
+          const scriptPath = path.join(__dirname, '../../scripts/face_detect_thumbnail.py');
+          const command = `${this.pythonCommand} "${scriptPath}" "${videoPath}" "${thumbnailPath}"`;
+          
+          await execAsync(command, { timeout: 30000 }); // 30 second timeout
+          
+          // Check if thumbnail was created
+          if (await fs.pathExists(thumbnailPath)) {
+            console.log(`✓ Face-detected thumbnail generated: ${videoId}.jpg`);
+            this.thumbnailCache.set(videoId, thumbnailPath);
+            return thumbnailPath;
+          }
+        } catch (faceError) {
+          console.warn(`⚠️  Face detection failed for ${videoId}, falling back to standard thumbnail:`, faceError.message);
+        }
+      }
+
+      // Fallback to standard thumbnail generation
+      console.log('📸 Generating standard thumbnail...');
       return new Promise((resolve, reject) => {
         ffmpeg(videoPath)
           .screenshots({
@@ -39,7 +100,7 @@ class ThumbnailService {
             size: config.thumbnailSize || '320x180'
           })
           .on('end', () => {
-            console.log(`✓ Thumbnail generated: ${videoId}.jpg`);
+            console.log(`✓ Standard thumbnail generated: ${videoId}.jpg`);
             this.thumbnailCache.set(videoId, thumbnailPath);
             resolve(thumbnailPath);
           })

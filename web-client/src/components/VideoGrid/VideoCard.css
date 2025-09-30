@@ -172,6 +172,67 @@
   background-color: rgba(229, 9, 20, 0.8);
 }
 
+/* Favorites Heart Button */
+.favorite-button {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  z-index: 20;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  opacity: 0.8;
+}
+
+.favorite-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.favorite-button.favorited {
+  background-color: rgba(229, 9, 20, 0.9);
+  color: #fff;
+  opacity: 1;
+}
+
+.favorite-button.favorited:hover {
+  background-color: var(--primary-red);
+  transform: scale(1.15);
+}
+
+/* Heart animation */
+.favorite-button svg {
+  transition: transform var(--transition-fast);
+}
+
+.favorite-button:active svg {
+  transform: scale(0.8);
+}
+
+.favorite-button.favorited svg {
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.2); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
 /* Card Details */
 .video-card-details {
   padding: var(--spacing-md);
@@ -216,6 +277,11 @@
   border-radius: var(--radius-sm);
   white-space: nowrap;
 }
+  .favorite-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
 
 .video-category {
   background-color: rgba(0, 113, 235, 0.2);
