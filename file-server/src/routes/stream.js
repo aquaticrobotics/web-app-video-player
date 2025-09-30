@@ -106,7 +106,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     const stat = await fs.promises.stat(videoPath);
     const fileSize = stat.size;
-    const range = req.headers.range;
+    let range = req.headers.range;
     const ifRange = req.headers['if-range'];
     const mimeType = mime.lookup(videoPath) || 'video/mp4';
     
@@ -170,9 +170,16 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
       const fileStream = fs.createReadStream(videoPath, streamOptions);
       
+      // Track if stream has been cleaned up
+      let streamClosed = false;
+      
       // Enhanced error handling with recovery
       fileStream.on('error', (err) => {
         console.error(`Stream error for video ${id}:`, err);
+        if (!streamClosed) {
+          streamClosed = true;
+          fileStream.destroy();
+        }
         if (!res.headersSent) {
           res.status(500).json({
             error: {
@@ -182,30 +189,31 @@ router.get('/:id', authenticateToken, async (req, res) => {
             }
           });
         } else {
-          res.destroy();
+          res.end();
         }
       });
 
-      // Handle client disconnect
-      req.on('close', () => {
-        fileStream.destroy();
-      });
+      // Handle client disconnect - properly clean up stream
+      const cleanup = () => {
+        if (!streamClosed) {
+          streamClosed = true;
+          fileStream.destroy();
+          console.log(`🧹 [STREAM] Cleaned up stream for video ${id} (client disconnect)`);
+        }
+      };
 
-      // Pipe with better error handling and detailed logging
+      req.on('close', cleanup);
+      req.on('aborted', cleanup);
+      res.on('close', cleanup);
+
+      // Pipe with better error handling and minimal logging
       console.log(`🎬 [STREAM DEBUG] Streaming range ${start}-${end}/${fileSize} (${contentLength} bytes)`);
       console.log(`🎬 [STREAM DEBUG] Stream options:`, streamOptions);
       
-      let bytesStreamed = 0;
-      fileStream.on('data', (chunk) => {
-        bytesStreamed += chunk.length;
-        if (bytesStreamed % (64 * 1024) === 0) { // Log every 64KB
-          console.log(`📤 [STREAM] Range: ${bytesStreamed}/${contentLength} bytes (${((bytesStreamed/contentLength)*100).toFixed(1)}%)`);
-        }
-      });
-      
       fileStream.on('end', () => {
         const duration = Date.now() - startTime;
-        console.log(`✅ [STREAM] Range completed: ${bytesStreamed} bytes in ${duration}ms`);
+        console.log(`✅ [STREAM] Range completed: ${contentLength} bytes in ${duration}ms`);
+        cleanup();
       });
       
       fileStream.pipe(res);
@@ -222,8 +230,15 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
       const fileStream = fs.createReadStream(videoPath, streamOptions);
       
+      // Track if stream has been cleaned up
+      let streamClosed = false;
+      
       fileStream.on('error', (err) => {
         console.error(`Full stream error for video ${id}:`, err);
+        if (!streamClosed) {
+          streamClosed = true;
+          fileStream.destroy();
+        }
         if (!res.headersSent) {
           res.status(500).json({
             error: {
@@ -233,29 +248,30 @@ router.get('/:id', authenticateToken, async (req, res) => {
             }
           });
         } else {
-          res.destroy();
+          res.end();
         }
       });
 
-      // Handle client disconnect
-      req.on('close', () => {
-        fileStream.destroy();
-      });
+      // Handle client disconnect - properly clean up stream
+      const cleanup = () => {
+        if (!streamClosed) {
+          streamClosed = true;
+          fileStream.destroy();
+          console.log(`🧹 [STREAM] Cleaned up stream for video ${id} (client disconnect)`);
+        }
+      };
+
+      req.on('close', cleanup);
+      req.on('aborted', cleanup);
+      res.on('close', cleanup);
 
       console.log(`🎬 [STREAM DEBUG] Streaming full file: ${fileSize} bytes`);
       console.log(`🎬 [STREAM DEBUG] Full stream options:`, streamOptions);
       
-      let bytesStreamed = 0;
-      fileStream.on('data', (chunk) => {
-        bytesStreamed += chunk.length;
-        if (bytesStreamed % (1024 * 1024) === 0) { // Log every 1MB
-          console.log(`📤 [STREAM] Full: ${(bytesStreamed/1024/1024).toFixed(1)}MB/${(fileSize/1024/1024).toFixed(1)}MB (${((bytesStreamed/fileSize)*100).toFixed(1)}%)`);
-        }
-      });
-      
       fileStream.on('end', () => {
         const duration = Date.now() - startTime;
-        console.log(`✅ [STREAM] Full completed: ${(bytesStreamed/1024/1024).toFixed(2)}MB in ${duration}ms`);
+        console.log(`✅ [STREAM] Full completed: ${(fileSize/1024/1024).toFixed(2)}MB in ${duration}ms`);
+        cleanup();
       });
       
       fileStream.pipe(res);
